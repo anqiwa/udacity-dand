@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+    <style type="text/css">
+
+        body {
+          margin: 50px;
+        }
+
+        h1 {
+            font-family: georgia;
+            font-size: 40px;
+            font-weight: bold;
+            text-align: left;
+            padding-left: 50px;
+            }
+
+        p {
+            font-family: helvetica;
+            font-size : 20px;
+            word-wrap: break-word;
+            text-align: left;
+            padding-left: 50px;
+            font-style: italic;
+            }
+
+        button {
+            -webkit-box-shadow:inset 0px 1px 3px 0px #91b8b3;
+            box-shadow:inset 0px 1px 3px 0px #91b8b3;
+            background-color:#000000;
+            border-radius:5px;
+            border:1px solid #000000;
+            display:inline-block;
+            cursor:pointer;
+            color:#FFFFFF;
+            font-family:Arial;
+            font-size:15px;
+            padding: 11px 23px;
+            padding-left:15px;
+            text-decoration:none;
+            margin-left:25px;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            top: 10px;
+            left: 25px;
+            }
+
+    </style>
+  </head>
+  <body>
+    <h1>Explore the differences between baseball players</h1>
+    <p>Click on the buttons below to find out more!</p>
+
+    <div id="buttonContainer">
+      <script type="text/javascript">
+
+        create_buttons("btn_1", "HR vs H vs W");
+        create_buttons("btn_2", "BA vs H vs W");
+        create_buttons("btn_3", "BA vs HR vs BMI");
+
+        // create interactve buttons
+        function create_buttons(id, text) {
+            d3.select("#buttonContainer")
+                .append("button")
+                .attr("id", id)
+                .transition()
+                .duration(100)
+                .text(text);
+        }
+
+        // change the color of the clicked button
+        function button_on_click(c) {
+            d3.select(c)
+                .transition()
+                .duration(100)
+                .style("background", "#FFFFFF")
+                .style("color", "black")
+        }
+
+        // function for restoring the color of the button after mouseout
+        function button_after_click(c)
+        {
+            d3.select(c)
+                .transition()
+                .duration(500)
+                .style("background", "#000000")
+                .style("color", "white")
+        }
+      </script>
+    </div>
+    <div id="chartContainer">
+      <script type="text/javascript">
+
+        // create chart
+        var svg = dimple.newSvg("#chartContainer", 1400, 700);
+
+        // add description
+        svg.append("text")
+            .attr("x", "50")
+            .attr("y", "80")
+            .style("font-size", "30px")
+            .style("font-family", "courier")
+            .text("This dataset contains 1157 baseball players, among which 892 are valid.");
+
+        svg.append("text")
+            .attr("x", "50")
+            .attr("y", "120")
+            .style("font-size", "30px")
+            .style("font-family", "courier")
+            .text("The attributes of players include handedness, height, weight, batting ");
+
+        svg.append("text")
+            .attr("x", "50")
+            .attr("y", "160")
+            .style("font-size", "30px")
+            .style("font-family", "courier")
+            .text("average, and home runs. I want to explore them and find out the key");
+
+        svg.append("text")
+            .attr("x", "50")
+            .attr("y", "200")
+            .style("font-size", "30px")
+            .style("font-family", "courier")
+            .text("differences between strong and weak players.");
+
+        // chart for average score on the click of first button
+
+        d3.select("#btn_1").on("click", function()
+        {
+            d3.select("svg").remove();
+            button_on_click(this);
+            var svg = dimple.newSvg("#chartContainer", 1400, 700)
+
+            // add description
+            svg.append("text")
+                .attr("x", "50")
+                .attr("y", "30")
+                .text("In this chart, x axis represents weight, y axis represents height, and the size of bubbles represents score of home runs. ");
+
+            // remove data with zero avg or HR value
+            function filter(d) {
+              if (d.avg != 0) {
+                return d;
+              }
+            };
+
+            // load csv file
+            d3.csv("baseball_data_BMI.csv", filter, function(data)
+              {
+
+              // create new chart
+              var myChart = new dimple.chart(svg, data);
+
+              // position and sizing the graphic
+              myChart.setBounds(50,100,1000,450);
+
+              // define x-axis
+              var x = myChart.addMeasureAxis("x", "weight");
+              x.title = "Weight";
+              x.fontSize = "12px";
+              x.ticks = 5;
+              x.overrideMin = 140;
+              x.overrideMax = 230;
+
+              // define y-axis
+              var y = myChart.addMeasureAxis("y", "height");
+              y.title = "Height";
+              y.fontSize = "12px";
+              y.ticks = 5;
+              y.overrideMin = 60;
+              y.overrideMax = 85;
+
+              // define z-axis
+              var z = myChart.addMeasureAxis("z", "HR");
+              z.title = "Number of players";
+              z.overrideMin = 0;
+              z.overrideMax = 570;
+
+              // add series
+              var s = myChart.addSeries(["height","handedness"], dimple.plot.bubble);
+              s.aggregate = dimple.aggregateMethod.avg;
+
+              var handDictionary = {};
+              handDictionary['L'] = 'Left'; handDictionary['R'] = 'Right'; handDictionary['B'] = 'Both';
+
+              data.forEach(function (d) {
+                d.weight = +d.weight;
+                d.HR = +d.HR;
+                d.avg = +d.avg;
+                d.height = +d.height;
+                d.handedness = handDictionary[d.handedness];
+              });
+
+
+              s.getTooltipText = function (e) {
+              return [
+                "Weight: " + (e.xValue).toFixed(0) + " lbs.",
+                "Height: " + (e.yValue).toFixed(0) + " in.",
+                "Handedness: " + e.aggField[1],
+                "Home Runs: " + (e.zValue).toFixed(0)
+                ];
+              };
+
+              // create legend area
+              svg.selectAll("legendArea")
+                .data(["Click legend to","show/hide handedness:"])
+                .enter()
+                .append("text")
+                .attr("x", 1100)
+                .attr("y", function (d, i) { return 160 + i * 14; })
+                .style("font-family", "sans-serif")
+                .style("font-size", "10px")
+                .style("color", "Black")
+                .text(function (d) { return d; });
+
+              var l = myChart.addLegend(1100, 200, 72, 240, "left");
+
+              // draw the chart
+              myChart.draw();
+
+              // orphan the legend.
+              myChart.legends = [];
+
+              // get a unique list of Owner values to use when filtering
+              var filterValues = dimple.getUniqueValues(data, "handedness");
+
+              // Get all the rectangles from our now orphaned legend
+              l.shapes.selectAll("rect")
+                // Add a click event to each rectangle
+                .on("click", function (e) {
+                // This indicates whether the item is already visible or not
+                var hide = false;
+                var newFilters = [];
+
+                // If the filters contain the clicked shape hide it
+                filterValues.forEach(function (f) {
+                 if (f === e.aggField.slice(-1)[0]) {
+                   hide = true;
+                 } else {
+                   newFilters.push(f);
+                 }
+                });
+                // Hide the shape or show it
+                if (hide) {
+                  d3.select(this).style("opacity", 0.2);
+                } else {
+                  newFilters.push(e.aggField.slice(-1)[0]);
+                  d3.select(this).style("opacity", 0.8);
+                };
+                // Update the filters
+                filterValues = newFilters;
+                // Filter the data
+                myChart.data = dimple.filterData(data, "handedness", filterValues);
+                // Passing a duration parameter makes the chart animate. Without it there is no transition
+                myChart.draw(800);
+              });
+          });
+        }).on("mouseout", function()
+          {
+              button_after_click(this);
+        });
+
+        // chart for average score on the click of second button
+
+        d3.select("#btn_2").on("click", function()
+        {
+            d3.select("svg").remove();
+            button_on_click(this);
+            var svg = dimple.newSvg("#chartContainer", 1400, 700)
+
+            // add description
+            svg.append("text")
+                .attr("x", "50")
+                .attr("y", "30")
+                .text("In this chart, x axis represents weight, y axis represents height, and the size of bubbles represents batting average score. ");
+
+            // remove data with zero avg or HR value
+            function filter(d) {
+              if (d.avg != 0) {
+                return d;
+              }
+            };
+
+            // load csv file
+            d3.csv("baseball_data_BMI.csv", filter, function(data)
+              {
+
+              // create new chart
+              var myChart = new dimple.chart(svg, data);
+
+              // position and sizing the graphic
+              myChart.setBounds(50,100,1000,450);
+
+              // define x-axis
+              var x = myChart.addMeasureAxis("x", "weight");
+              x.title = "Weight";
+              x.fontSize = "12px";
+              x.ticks = 5;
+              x.overrideMin = 140;
+              x.overrideMax = 230;
+
+              // define y-axis
+              var y = myChart.addMeasureAxis("y", "height");
+              y.title = "Height";
+              y.fontSize = "12px";
+              y.ticks = 5;
+              y.overrideMin = 60;
+              y.overrideMax = 85;
+
+              // define z-axis
+              var z = myChart.addMeasureAxis("z", "avg");
+              z.title = "Batting Average";
+              z.overrideMin = 0.05;
+              z.overrideMax = 0.33;
+
+              // add series
+              var s = myChart.addSeries(["height","handedness"], dimple.plot.bubble);
+              s.aggregate = dimple.aggregateMethod.avg;
+
+              var handDictionary = {};
+              handDictionary['L'] = 'Left'; handDictionary['R'] = 'Right'; handDictionary['B'] = 'Both';
+
+              data.forEach(function (d) {
+                d.weight = +d.weight;
+                d.HR = +d.HR;
+                d.avg = +d.avg;
+                d.height = +d.height;
+                d.handedness = handDictionary[d.handedness];
+              });
+
+
+              s.getTooltipText = function (e) {
+              return [
+                "Weight: " + (e.xValue).toFixed(0) + " lbs.",
+                "Height: " + (e.yValue).toFixed(0) + " in.",
+                "Handedness: " + e.aggField[1],
+                "Batting Average: " + (e.zValue).toFixed(2)
+                ];
+              };
+
+              // create legend area
+              svg.selectAll("legendArea")
+                .data(["Click legend to","show/hide handedness:"])
+                .enter()
+                .append("text")
+                .attr("x", 1100)
+                .attr("y", function (d, i) { return 160 + i * 14; })
+                .style("font-family", "sans-serif")
+                .style("font-size", "10px")
+                .style("color", "Black")
+                .text(function (d) { return d; });
+
+              var l = myChart.addLegend(1100, 200, 72, 240, "left");
+
+              // draw the chart
+              myChart.draw();
+
+              // orphan the legend.
+              myChart.legends = [];
+
+              // get a unique list of Owner values to use when filtering
+              var filterValues = dimple.getUniqueValues(data, "handedness");
+
+              // Get all the rectangles from our now orphaned legend
+              l.shapes.selectAll("rect")
+                // Add a click event to each rectangle
+                .on("click", function (e) {
+                // This indicates whether the item is already visible or not
+                var hide = false;
+                var newFilters = [];
+
+                // If the filters contain the clicked shape hide it
+                filterValues.forEach(function (f) {
+                 if (f === e.aggField.slice(-1)[0]) {
+                   hide = true;
+                 } else {
+                   newFilters.push(f);
+                 }
+                });
+                // Hide the shape or show it
+                if (hide) {
+                  d3.select(this).style("opacity", 0.2);
+                } else {
+                  newFilters.push(e.aggField.slice(-1)[0]);
+                  d3.select(this).style("opacity", 0.8);
+                };
+                // Update the filters
+                filterValues = newFilters;
+                // Filter the data
+                myChart.data = dimple.filterData(data, "handedness", filterValues);
+                // Passing a duration parameter makes the chart animate. Without it there is no transition
+                myChart.draw(800);
+              });
+          });
+        }).on("mouseout", function()
+          {
+              button_after_click(this);
+        });
+
+        // chart for average score on the click of third button
+
+        d3.select("#btn_3").on("click", function()
+        {
+            d3.select("svg").remove();
+            button_on_click(this);
+            var svg = dimple.newSvg("#chartContainer", 1400, 700)
+
+            // add description
+            svg.append("text")
+                .attr("x", "50")
+                .attr("y", "30")
+                .text("In this chart, x axis represents score of home runs, y axis represents batting average scores, and the size of bubbles represents BMI scores. ");
+
+            // remove data with zero avg or HR value
+            function filter(d) {
+              if (d.avg != 0) {
+                return d;
+              }
+            };
+
+            // load csv file
+            d3.csv("baseball_data_BMI.csv", filter, function(data)
+              {
+
+              // create new chart
+              var myChart = new dimple.chart(svg, data);
+
+              // position and sizing the graphic
+              myChart.setBounds(50,100,1000,450);
+
+              // define x-axis
+              var x = myChart.addMeasureAxis("x", "HR");
+              x.title = "Home Runs";
+              x.fontSize = "12px";
+              x.ticks = 5;
+              x.overrideMin = 0;
+              x.overrideMax = 563;
+
+              // define y-axis
+              var y = myChart.addMeasureAxis("y", "avg");
+              y.title = "Batting Average";
+              y.fontSize = "12px";
+              y.ticks = 5;
+              y.overrideMin = 0.05;
+              y.overrideMax = 0.33;
+
+              // define z-axis
+              var z = myChart.addMeasureAxis("z", "BMI");
+              z.title = "BMI";
+              z.overrideMin = 19.50;
+              z.overrideMax = 31.00;
+
+              // add series
+              var s = myChart.addSeries(["name","OOH"], dimple.plot.bubble);
+              s.aggregate = dimple.aggregateMethod.avg;
+
+              var oohDictionary = {};
+              oohDictionary['Ob'] = 'Obeisity'; oohDictionary['Ov'] = 'Overweight'; oohDictionary['He'] = 'Healthy';
+
+              data.forEach(function (d) {
+                d.weight = +d.weight;
+                d.HR = +d.HR;
+                d.avg = +d.avg;
+                d.height = +d.height;
+                d.OOH = oohDictionary[d.OOH];
+              });
+
+
+              s.getTooltipText = function (e) {
+              return [
+                "Home Runs: " + (e.xValue).toFixed(0),
+                "Batting Average: " + (e.yValue).toFixed(2) ,
+                "Health Condition: " + e.aggField[2],
+                "BMI: " + (e.zValue).toFixed(2)
+                ];
+              };
+
+              // create legend area
+              svg.selectAll("legendArea")
+                .data(["Click legend to","show/hide health condition:"])
+                .enter()
+                .append("text")
+                .attr("x", 1100)
+                .attr("y", function (d, i) { return 160 + i * 14; })
+                .style("font-family", "sans-serif")
+                .style("font-size", "10px")
+                .style("color", "Black")
+                .text(function (d) { return d; });
+
+              var l = myChart.addLegend(1100, 200, 72, 240, "left");
+
+              // draw the chart
+              myChart.draw();
+
+              // orphan the legend.
+              myChart.legends = [];
+
+              // get a unique list of Owner values to use when filtering
+              var filterValues = dimple.getUniqueValues(data, "OOH");
+
+              // Get all the rectangles from our now orphaned legend
+              l.shapes.selectAll("rect")
+                // Add a click event to each rectangle
+                .on("click", function (e) {
+                // This indicates whether the item is already visible or not
+                var hide = false;
+                var newFilters = [];
+
+                // If the filters contain the clicked shape hide it
+                filterValues.forEach(function (f) {
+                 if (f === e.aggField.slice(-1)[0]) {
+                   hide = true;
+                 } else {
+                   newFilters.push(f);
+                 }
+                });
+                // Hide the shape or show it
+                if (hide) {
+                  d3.select(this).style("opacity", 0.2);
+                } else {
+                  newFilters.push(e.aggField.slice(-1)[0]);
+                  d3.select(this).style("opacity", 0.8);
+                };
+                // Update the filters
+                filterValues = newFilters;
+                // Filter the data
+                myChart.data = dimple.filterData(data, "OOH", filterValues);
+                // Passing a duration parameter makes the chart animate. Without it there is no transition
+                myChart.draw(800);
+              });
+
+          });
+        }).on("mouseout", function()
+          {
+              button_after_click(this);
+      });
+
+
+      </script>
+    </div>
+  </body>
+</html>

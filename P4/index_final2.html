@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+    <style type="text/css">
+
+        body {
+          margin: 50px;
+        }
+
+        h1 {
+            font-family: georgia;
+            font-size: 50px;
+            font-weight: bold;
+            text-align: left;
+            padding-left: 50px;
+            }
+
+        h2 {
+            font-family: georgia;
+            font-size: 30px;
+            text-align: left;
+            padding-top: 10px;
+            padding-left: 50px;
+            }
+
+        p {
+            font-family: helvetica;
+            font-size : 20px;
+            word-wrap: break-word;
+            text-align: left;
+            padding-left: 50px;
+            font-style: italic;
+            }
+
+        button {
+            -webkit-box-shadow:inset 0px 1px 3px 0px #91b8b3;
+            box-shadow:inset 0px 1px 3px 0px #91b8b3;
+            background-color:#000000;
+            border-radius:5px;
+            border:1px solid #000000;
+            display:inline-block;
+            cursor:pointer;
+            color:#FFFFFF;
+            font-family:Arial;
+            font-size:15px;
+            padding: 11px 23px;
+            padding-left:15px;
+            text-decoration:none;
+            margin-left:25px;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            top: 10px;
+            left: 25px;
+            }
+
+    </style>
+  </head>
+  <body>
+    <h1>Explore the differences between baseball players</h1>
+    <p>This dataset contains 1157 baseball players, among which 892 are valid.The attributes of players include handedness, height, weight, batting average, and home runs. I want to explore them and find out the key differences between strong and weak players.</p>
+
+
+    <h2>1. Is handedness a key factor of good performance?</h2>
+    <div id="chartHand">
+      <script type="text/javascript">
+
+        var svg = dimple.newSvg("#chartHand", 1400, 550)
+
+       // remove data with zero avg value
+        function filter(d) {
+          if (d.Batting_Average != 0) {
+             return d;
+          }
+        };
+
+       // load csv file
+        d3.csv("baseball_data_updated2.csv", filter, function(data)
+          {
+
+          // create chart for number of players in each handedness
+          var myChart0 = new dimple.chart(svg, data);
+
+          // position and sizing the graphic
+          myChart0.setBounds(100,50,400,450);
+
+          // define x-axis
+          var x = myChart0.addMeasureAxis("x", "Batting_Average");
+          x.fontSize = "12px";
+          x.tickFormat = ',.2f';
+          x.overrideMin = 0.23;
+          x.overrideMax = 0.26;
+          x.ticks = 3;
+
+          // define y-axis
+          var y = myChart0.addMeasureAxis("y", "Home_Runs");
+          y.title = "Home Runs Average";
+          y.fontSize = "12px";
+          y.ticks = 10;
+          y.overrideMin = 35;
+          y.overrideMax = 75;
+
+          // defind z-axis
+          var z = myChart0.addMeasureAxis("z", "Name");
+
+          // add series
+          var s = myChart0.addSeries("Handedness", dimple.plot.bubble);
+          s.aggregate = dimple.aggregateMethod.avg;
+          myChart0.assignColor("Left","#F1948A");
+          myChart0.assignColor("Right","#7FB3D5");
+          myChart0.assignColor("Both","#F1C40F");
+
+          // add title
+          svg.append("text")
+              .attr("x", 220)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Lefty vs Righty vs Both")
+
+          // draw the chart
+          myChart0.draw();
+
+          // create new chart for Home Runs
+          var myChart1 = new dimple.chart(svg, data);
+
+          // position and sizing the graphic
+          myChart1.setBounds(600,50,200,450);
+
+          // define x-axis
+          var x = myChart1.addCategoryAxis("x", "Handedness");
+          x.fontSize = "12px";
+
+          // define y-axis
+          var y = myChart1.addMeasureAxis("y", "Home_Runs");
+          y.title = "Home Runs Average";
+          y.fontSize = "12px";
+          y.ticks = 5;
+
+          // add series
+          var s = myChart1.addSeries("Handedness", dimple.plot.bar);
+          s.aggregate = dimple.aggregateMethod.avg;
+          myChart1.assignColor("Left","#F1948A");
+          myChart1.assignColor("Right","#7FB3D5");
+          myChart1.assignColor("Both","#F1C40F");
+
+          // create legend area
+          var l = myChart1.addLegend(1200, 200, 72, 240, "left");
+
+          // add title
+          svg.append("text")
+              .attr("x", 630)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Home Runs Average")
+
+          // draw the chart
+          myChart1.draw();
+
+          // create new chart for Batting Average
+          var myChart2= new dimple.chart(svg, data);
+
+          // position and sizing the graphic
+          myChart2.setBounds(900,50,200,450);
+
+          // define x-axis
+          var x2 = myChart2.addCategoryAxis("x", "Handedness");
+          x2.fontSize = "12px";
+
+          // define y-axis
+          var y2 = myChart2.addMeasureAxis("y", "Batting_Average");
+          y2.title = "Batting Average";
+          y2.fontSize = "12px";
+          y2.ticks = 5;
+          y2.tickFormat = ',.2f';
+
+          // add series
+          var s2 = myChart2.addSeries("Handedness", dimple.plot.bar);
+          s2.aggregate = dimple.aggregateMethod.avg;
+          myChart2.assignColor("Left","#F1948A");
+          myChart2.assignColor("Right","#7FB3D5");
+          myChart2.assignColor("Both","#F1C40F");
+
+          // create legend area
+          var l2 = myChart2.addLegend(1200, 200, 72, 240, "left");
+
+          // add title
+          svg.append("text")
+              .attr("x", 940)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Batting Average")
+
+          // draw the chart
+          myChart2.draw();
+
+          });
+
+      </script>
+    </div>
+    <h2>2. Is BMI a key factor of good performance?</h2>
+    <div id="chartBMI">
+      <script type="text/javascript">
+
+        var svg2 = dimple.newSvg("#chartBMI", 1400, 550);
+
+        // remove data with zero avg value
+        function filter(d) {
+          if (d.Batting_Average != 0) {
+            return d;
+          }
+        };
+
+        // load csv file
+        d3.csv("baseball_data_updated2.csv", filter, function(data)
+          {
+
+          // create chart for number of players in each health condition
+          var myChart0 = new dimple.chart(svg2, data);
+
+          // position and sizing the graphic
+          myChart0.setBounds(100,50,400,450);
+
+          // define x-axis
+          var x = myChart0.addMeasureAxis("x", "Batting_Average");
+          x.fontSize = "12px";
+          x.tickFormat = ',.3f';
+          x.overrideMin = 0.241;
+          x.overrideMax = 0.244;
+          x.ticks = 3;
+
+          // define y-axis
+          var y = myChart0.addMeasureAxis("y", "Home_Runs");
+          y.title = "Home Runs Average";
+          y.fontSize = "12px";
+          y.ticks = 10;
+          y.overrideMin = 40;
+          y.overrideMax = 80;
+
+          // defind z-axis
+          var z = myChart0.addMeasureAxis("z", "Name");
+
+          // add series
+          var s = myChart0.addSeries("Health_Condition", dimple.plot.bubble);
+          s.aggregate = dimple.aggregateMethod.avg;
+          myChart0.assignColor("Healthy","#F1948A");
+          myChart0.assignColor("Overweight","#7FB3D5");
+          myChart0.assignColor("Obese","#F1C40F");
+
+          // add title
+          svg2.append("text")
+              .attr("x", 180)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Healthy vs Overweight vs Obese")
+
+          // draw the chart
+          myChart0.draw();
+
+          // create new chart for Home Runs
+          var myChart1 = new dimple.chart(svg2, data);
+
+          // position and sizing the graphic
+          myChart1.setBounds(600,50,200,450);
+
+          // define x-axis
+          var x = myChart1.addCategoryAxis("x", "Health_Condition");
+          x.fontSize = "12px";
+
+          // define y-axis
+          var y = myChart1.addMeasureAxis("y", "Home_Runs");
+          y.title = "Home Runs Average";
+          y.fontSize = "12px";
+          y.ticks = 5;
+
+          // add series
+          var s = myChart1.addSeries("Health_Condition", dimple.plot.bar);
+          s.aggregate = dimple.aggregateMethod.avg;
+          myChart1.assignColor("Healthy","#F1948A");
+          myChart1.assignColor("Overweight","#7FB3D5");
+          myChart1.assignColor("Obese","#F1C40F");
+
+          // create legend area
+          var l = myChart1.addLegend(1200, 200, 72, 240, "left");
+
+          // add title
+          svg2.append("text")
+              .attr("x", 630)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Home Runs Average")
+
+          // draw the chart
+          myChart1.draw();
+
+          // create new chart for Batting Average
+          var myChart2= new dimple.chart(svg2, data);
+
+          // position and sizing the graphic
+          myChart2.setBounds(900,50,200,450);
+
+          // define x-axis
+          var x2 = myChart2.addCategoryAxis("x", "Health_Condition");
+          x2.fontSize = "12px";
+
+          // define y-axis
+          var y2 = myChart2.addMeasureAxis("y", "Batting_Average");
+          y2.title = "Batting Average";
+          y2.fontSize = "12px";
+          y2.ticks = 5;
+          y2.tickFormat = ',.2f';
+
+          // add series
+          var s2 = myChart2.addSeries("Health_Condition", dimple.plot.bar);
+          s2.aggregate = dimple.aggregateMethod.avg;
+          myChart2.assignColor("Healthy","#F1948A");
+          myChart2.assignColor("Overweight","#7FB3D5");
+          myChart2.assignColor("Obese","#F1C40F");
+
+          // create legend area
+          var l2 = myChart2.addLegend(1200, 200, 72, 240, "left");
+
+          // add title
+          svg2.append("text")
+              .attr("x", 940)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Batting Average")
+
+          // draw the chart
+          myChart2.draw();
+
+          });
+      </script>
+    </div>
+    <h2>3. Is HEIGHT a key factor of good performance?</h2>
+    <div id="chartHEIGHT">
+      <script type="text/javascript">
+
+        var svg3 = dimple.newSvg("#chartHEIGHT", 1400, 550);
+
+        // remove data with zero avg value
+        function filter(d) {
+          if (d.Batting_Average != 0) {
+            return d;
+          }
+        };
+
+        // load csv file
+        d3.csv("baseball_data_updated2.csv", filter, function(data)
+          {
+
+          // create chart for number of players above or below average height
+          var myChart0 = new dimple.chart(svg3, data);
+
+          // position and sizing the graphic
+          myChart0.setBounds(100,50,400,450);
+
+          // define x-axis
+          var x = myChart0.addMeasureAxis("x", "Batting_Average");
+          x.fontSize = "12px";
+          x.tickFormat = ',.3f';
+          x.overrideMin = 0.235;
+          x.overrideMax = 0.25;
+          x.ticks = 3;
+
+          // define y-axis
+          var y = myChart0.addMeasureAxis("y", "Home_Runs");
+          y.title = "Home Runs Average";
+          y.fontSize = "12px";
+          y.ticks = 10;
+          y.overrideMin = 40;
+          y.overrideMax = 85;
+
+          // defind z-axis
+          var z = myChart0.addMeasureAxis("z", "Name");
+
+          // add series
+          var s = myChart0.addSeries("Average_Height", dimple.plot.bubble);
+          s.aggregate = dimple.aggregateMethod.avg;
+          myChart0.assignColor("Above","#F1948A");
+          myChart0.assignColor("Below","#7FB3D5");
+
+          // add title
+          svg3.append("text")
+              .attr("x", 180)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Above vs Below Average Height")
+
+          // draw the chart
+          myChart0.draw();
+
+          // create new chart for Home Runs
+          var myChart1 = new dimple.chart(svg3, data);
+
+          // position and sizing the graphic
+          myChart1.setBounds(600,50,200,450);
+
+          // define x-axis
+          var x = myChart1.addCategoryAxis("x", "Average_Height");
+          x.fontSize = "12px";
+
+          // define y-axis
+          var y = myChart1.addMeasureAxis("y", "Home_Runs");
+          y.title = "Home Runs Average";
+          y.fontSize = "12px";
+          y.ticks = 5;
+
+          // add series
+          var s = myChart1.addSeries("Average_Height", dimple.plot.bar);
+          s.aggregate = dimple.aggregateMethod.avg;
+          myChart1.assignColor("Above","#F1948A");
+          myChart1.assignColor("Below","#7FB3D5");
+
+          // create legend area
+          var l = myChart1.addLegend(1200, 200, 72, 240, "left");
+
+          // add title
+          svg3.append("text")
+              .attr("x", 630)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Home Runs Average")
+
+          // draw the chart
+          myChart1.draw();
+
+          // create new chart for Batting Average
+          var myChart2= new dimple.chart(svg3, data);
+
+          // position and sizing the graphic
+          myChart2.setBounds(900,50,200,450);
+
+          // define x-axis
+          var x2 = myChart2.addCategoryAxis("x", "Average_Height");
+          x2.fontSize = "12px";
+
+          // define y-axis
+          var y2 = myChart2.addMeasureAxis("y", "Batting_Average");
+          y2.title = "Batting Average";
+          y2.fontSize = "10px";
+          y2.ticks = 5;
+          y2.tickFormat = ',.2f';
+
+          // add series
+          var s2 = myChart2.addSeries("Average_Height", dimple.plot.bar);
+          s2.aggregate = dimple.aggregateMethod.avg;
+          myChart2.assignColor("Above","#F1948A");
+          myChart2.assignColor("Below","#7FB3D5");
+
+          // create legend area
+          var l2 = myChart2.addLegend(1200, 200, 72, 240, "left");
+
+          // add title
+          svg3.append("text")
+              .attr("x", 950)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Batting Average")
+
+          // draw the chart
+          myChart2.draw();
+
+          });
+      </script>
+    </div>
+    <h2>4. Is WEIGHT a key factor of good performance?</h2>
+    <div id="chartWEIGHT">
+      <script type="text/javascript">
+
+        var svg4 = dimple.newSvg("#chartWEIGHT", 1400, 600);
+
+        // remove data with zero avg value
+        function filter(d) {
+          if (d.Batting_Average != 0) {
+            return d;
+          }
+        };
+
+        // load csv file
+        d3.csv("baseball_data_updated2.csv", filter, function(data)
+          {
+
+          // create chart for number of players in each handedness
+          var myChart0 = new dimple.chart(svg4, data);
+
+          // position and sizing the graphic
+          myChart0.setBounds(100,50,400,450);
+
+          // define x-axis
+          var x = myChart0.addMeasureAxis("x", "Batting_Average");
+          x.fontSize = "12px";
+          x.tickFormat = ',.3f';
+          x.overrideMin = 0.235;
+          x.overrideMax = 0.25;
+          x.ticks = 3;
+
+          // define y-axis
+          var y = myChart0.addMeasureAxis("y", "Home_Runs");
+          y.title = "Home Runs Average";
+          y.fontSize = "12px";
+          y.ticks = 10;
+          y.overrideMin = 40;
+          y.overrideMax = 90;
+
+          // defind z-axis
+          var z = myChart0.addMeasureAxis("z", "Name");
+
+          // add series
+          var s = myChart0.addSeries("Average_Weight", dimple.plot.bubble);
+          s.aggregate = dimple.aggregateMethod.avg;
+          myChart0.assignColor("Above","#F1948A");
+          myChart0.assignColor("Below","#7FB3D5");
+
+          // add title
+          svg4.append("text")
+              .attr("x", 180)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Above vs Below Average Weight")
+
+          // draw the chart
+          myChart0.draw();
+
+          // create new chart for Home Runs
+          var myChart1 = new dimple.chart(svg4, data);
+
+          // position and sizing the graphic
+          myChart1.setBounds(600,50,200,450);
+
+          // define x-axis
+          var x = myChart1.addCategoryAxis("x", "Average_Weight");
+          x.fontSize = "12px";
+
+          // define y-axis
+          var y = myChart1.addMeasureAxis("y", "Home_Runs");
+          y.title = "Home Runs Average";
+          y.fontSize = "12px";
+          y.ticks = 5;
+
+          // add series
+          var s = myChart1.addSeries("Average_Weight", dimple.plot.bar);
+          s.aggregate = dimple.aggregateMethod.avg;
+
+          // create legend area
+          var l = myChart1.addLegend(1200, 200, 72, 240, "left");
+
+          // add title
+          svg4.append("text")
+              .attr("x", 630)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Home Runs Average")
+
+          // draw the chart
+          myChart1.draw();
+
+          // create new chart for Batting Average
+          var myChart2= new dimple.chart(svg4, data);
+
+          // position and sizing the graphic
+          myChart2.setBounds(900,50,200,450);
+
+          // define x-axis
+          var x2 = myChart2.addCategoryAxis("x", "Average_Weight");
+          x2.fontSize = "12px";
+
+          // define y-axis
+          var y2 = myChart2.addMeasureAxis("y", "Batting_Average");
+          y2.title = "Batting Average";
+          y2.fontSize = "12px";
+          y2.ticks = 5;
+          y2.tickFormat = ',.2f';
+
+          // add series
+          var s2 = myChart2.addSeries("Average_Weight", dimple.plot.bar);
+          s2.aggregate = dimple.aggregateMethod.avg;
+
+          // create legend area
+          var l2 = myChart2.addLegend(1200, 200, 72, 240, "left");
+
+          // add title
+          svg4.append("text")
+              .attr("x", 950)
+              .attr("y", 30)
+              .style("font-family", "sans-serif")
+              .style("font-size", "15px")
+              .style("font-weight", "bold")
+              .text("Batting Average")
+
+          // draw the chart
+          myChart2.draw();
+
+          });
+      </script>
+    </div>
+
+    <div id="buttonContainer">
+      <script type="text/javascript">
+
+        create_buttons("btn_1", "Click to see conclusion!");
+
+        // create interactve buttons
+        function create_buttons(id, text) {
+            d3.select("#buttonContainer")
+                .append("button")
+                .attr("id", id)
+                .transition()
+                .duration(100)
+                .text(text);
+        }
+
+        // change the color of the clicked button
+        function button_on_click(c) {
+            d3.select(c)
+                .transition()
+                .duration(100)
+                .style("background", "#FFFFFF")
+                .style("color", "black")
+        }
+
+        // function for restoring the color of the button after mouseout
+        function button_after_click(c)
+        {
+            d3.select(c)
+                .transition()
+                .duration(100)
+                .style("background", "#000000")
+                .style("color", "white")
+        }
+      </script>
+    </div>
+    <div id="conclusion">
+      <script type="text/javascript">
+
+        // chart for average score on the click of FIRST button
+
+        d3.select("#btn_1").on("click", function()
+        {
+            button_on_click(this);
+            var svg = dimple.newSvg("#conclusion", 1400, 600)
+
+            // add description
+            svg.append("text")
+                .attr("x", "50")
+                .attr("y", "20")
+                .style("font-size","20px")
+                .text("1. Lefty players perform best on both batting average and home runs average, ambidexious players perform worst on home runs average.");
+
+            svg.append("text")
+                .attr("x", "73")
+                .attr("y", "50")
+                .style("font-size","20px")
+                .text("However the number of ambidexious players are far less than that of righty players, so the conclusion may not be accurate.");
+
+            svg.append("text")
+                .attr("x", "50")
+                .attr("y", "90")
+                .style("font-size","20px")
+                .text("2. Health condition is unrelated to batting average, but players with higher BMI performs better in terms of home runs average.");
+
+            svg.append("text")
+                .attr("x", "73")
+                .attr("y", "120")
+                .style("font-size","20px")
+                .text("However the number of obese players are far less than that of other players, so the conclusion may not be accurate.");
+
+            svg.append("text")
+                .attr("x", "50")
+                .attr("y", "160")
+                .style("font-size","20px")
+                .text("3. Players with above average height performs better on home runs average, while players with below average height performs slightly");
+
+            svg.append("text")
+                .attr("x", "73")
+                .attr("y", "190")
+                .style("font-size","20px")
+                .text("better on batting average.");
+
+            svg.append("text")
+                .attr("x", "50")
+                .attr("y", "230")
+                .style("font-size","20px")
+                .text("4. Players with above average weight performs better on home runs average, while players with below average weight performs slightly");
+
+            svg.append("text")
+                .attr("x", "73")
+                .attr("y", "260")
+                .style("font-size","20px")
+                .text("better on batting average.");
+
+        }).on("mouseout", function()
+          {
+              button_after_click(this);
+        });
+      </script>
+    </div>
+  </body>
+</html>
