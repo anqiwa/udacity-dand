@@ -1,1 +1,1 @@
-# udacity-dand
+# Udacity-Data Analysis Nano Degree
