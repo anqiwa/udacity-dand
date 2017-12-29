@@ -6,7 +6,7 @@
 This repository contains my work for Udacity's Data Analyst Nanodegree Program.
 
 ## Projects:
-* p3 - OpenStreetMap Data Wrangling with SQL and MongoDB
-* p4 - Exploratory Data Analysis With R
-* p5 - Identifying Fraud at Enron (Machine Learning With Python)
-* p6 - Make Effective Data Visualization with D3.js And Dimple.js
+* p1 - OpenStreetMap Data Wrangling with SQL and MongoDB
+* p2 - Exploratory Data Analysis With R
+* p3 - Identifying Fraud at Enron (Machine Learning With Python)
+* p4 - Make Effective Data Visualization with D3.js And Dimple.js
