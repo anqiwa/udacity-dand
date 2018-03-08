@@ -1,6 +1,6 @@
 # Udacity-Data Analysis Nano Degree Program
 
-![nd002-cn-advanced-1](https://user-images.githubusercontent.com/32975054/34429646-05b54b42-ec96-11e7-9f61-7b68bea58ad6.jpg)
+![0_1](https://user-images.githubusercontent.com/32975054/37140704-a87f9142-22ed-11e8-9625-9d817c81ad3c.jpg)
 
 ## About
 This repository contains my work for Udacity's Data Analyst Nanodegree Program.
